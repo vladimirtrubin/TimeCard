@@ -5,167 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pay Period Selection</title>
     <link rel="stylesheet" href="../css/styles.css">
-    <style>
-        .pay-period-section {
-            margin: 30px 0;
-            text-align: left;
-        }
-
-        .pay-period-option {
-            display: flex;
-            align-items: center;
-            margin: 15px 0;
-            white-space: nowrap;
-        }
-
-        .pay-period-option input[type="radio"] {
-            margin: 0;
-            margin-right: 10px;
-            width: 20px;
-            height: 20px;
-        }
-
-        .pay-period-option label {
-            font-size: 16px;
-            line-height: 20px;
-            margin: 0;
-            cursor: pointer;
-        }
-
-        .message {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-        }
-
-        .message.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .timecard-history {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
-
-        .timecard-history h3 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .timecard-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .timecard-item {
-            background-color: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .timecard-item:hover {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .timecard-info {
-            flex-grow: 1;
-        }
-
-        .pay-period {
-            font-size: 16px;
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .timecard-date {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .download-btn {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 8px 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.2s ease;
-        }
-
-        .download-btn:hover {
-            background-color: #218838;
-        }
-
-        .download-icon {
-            font-size: 18px;
-        }
-
-        .timecard-history {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 25px;
-            margin-top: 40px;
-        }
-
-        .timecard-history h3 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 20px;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 10px;
-        }
-
-        .no-timecards {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-            background-color: white;
-            border-radius: 4px;
-            border: 1px solid #e0e0e0;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
-        <h2>Welcome, <span id="employeeName">Vladimir Trubin</span></h2>
-        <p class="employee-info">Employee ID: <span id="employeeId">891</span></p>
+        <h2>Welcome, <span id="employeeName"></span></h2>
+        <p class="employee-info">Employee ID: <span id="employeeId"></span></p>
 
         <div class="pay-period-section">
             <h3>Select a Pay Period</h3>
-            
             <div class="pay-period-option">
                 <input type="radio" id="previousPeriod" name="payPeriod" value="previous">
-                <label for="previousPeriod">Previous Pay Period: 2024-10-07 to 2024-10-20</label>
+                <label for="previousPeriod">Previous Pay Period</label>
             </div>
 
             <div class="pay-period-option">
                 <input type="radio" id="currentPeriod" name="payPeriod" value="current" checked>
-                <label for="currentPeriod">Current Pay Period: 2024-10-21 to 2024-11-03</label>
+                <label for="currentPeriod">Current Pay Period</label>
             </div>
 
             <div class="pay-period-option">
                 <input type="radio" id="nextPeriod" name="payPeriod" value="next">
-                <label for="nextPeriod">Next Pay Period: 2024-11-04 to 2024-11-17</label>
+                <label for="nextPeriod">Next Pay Period</label>
             </div>
         </div>
 
@@ -175,176 +35,8 @@
         </div>
 
         <div id="message" style="display: none;" class="message"></div>
-
-        <div class="timecard-history">
-            <h3>Recent Timecards</h3>
-            <div id="timecardList" class="timecard-list">
-                <!-- Timecard history will be inserted here -->
-            </div>
-        </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const messageEl = document.getElementById('message');
-            const API_URL = 'http://localhost:5000';
-
-            // Add formatting functions
-            function formatPayPeriod(payPeriod) {
-                const [startDate, endDate] = payPeriod.split(' to ').map(date => {
-                    const [year, month, day] = date.split('-');
-                    return `${month}/${day}/${year}`;
-                });
-                return `${startDate} - ${endDate}`;
-            }
-
-            function formatDate(dateString) {
-                const date = new Date(dateString);
-                return date.toLocaleString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            }
-
-            document.getElementById('generateTimecard').addEventListener('click', async function() {
-                try {
-                    const selectedPeriod = document.querySelector('input[name="payPeriod"]:checked').value;
-                    const employeeId = document.getElementById('employeeId').textContent;
-                    
-                    messageEl.textContent = 'Generating timecard...';
-                    messageEl.style.display = 'block';
-                    messageEl.className = 'message';
-
-                    const response = await fetch(`${API_URL}/api/pdf/timecard/generate`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        },
-                        body: JSON.stringify({
-                            employeeId,
-                            payPeriod: selectedPeriod
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to generate timecard');
-                    }
-
-                    const data = await response.json();
-                    localStorage.setItem('timecardData', JSON.stringify(data));
-                    window.location.href = 'timecard-review.html';
-
-                } catch (error) {
-                    console.error('Error:', error);
-                    messageEl.textContent = error.message || 'Error generating timecard. Please try again.';
-                    messageEl.className = 'message error';
-                }
-            });
-
-            document.getElementById('logout').addEventListener('click', function() {
-                localStorage.removeItem('token');
-                localStorage.removeItem('currentEmployee');
-                window.location.href = 'login.html';
-            });
-
-            async function loadTimecardHistory() {
-                try {
-                    const employeeId = document.getElementById('employeeId').textContent;
-                    const response = await fetch(
-                        `${API_URL}/api/pdf/timecard/history/${employeeId}`,
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                            }
-                        }
-                    );
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch timecard history');
-                    }
-
-                    const data = await response.json();
-                    const timecardList = document.getElementById('timecardList');
-                    
-                    if (!data.timecards || data.timecards.length === 0) {
-                        timecardList.innerHTML = '<div class="no-timecards">No submitted timecards found</div>';
-                        return;
-                    }
-
-                    // Sort timecards by submission date (most recent first)
-                    const sortedTimecards = data.timecards.sort((a, b) => 
-                        new Date(b.submittedDate) - new Date(a.submittedDate)
-                    );
-
-                    // Take only the 5 most recent timecards
-                    const recentTimecards = sortedTimecards.slice(0, 5);
-
-                    timecardList.innerHTML = recentTimecards.map(timecard => {
-                        return `
-                            <div class="timecard-item">
-                                <div class="timecard-info">
-                                    <div class="pay-period">Pay Period: ${formatPayPeriod(timecard.payPeriod)}</div>
-                                    <div class="timecard-date">Submitted: ${formatDate(timecard.submittedDate)}</div>
-                                </div>
-                                <button onclick="downloadTimecard('${timecard.filename}')" class="download-btn">
-                                    <span class="download-icon">📥</span> Download PDF
-                                </button>
-                            </div>
-                        `;
-                    }).join('');
-
-                } catch (error) {
-                    console.error('Error loading timecard history:', error);
-                    document.getElementById('timecardList').innerHTML = 
-                        '<div class="no-timecards">Error loading timecard history</div>';
-                }
-            }
-
-            // Make downloadTimecard function global
-            window.downloadTimecard = async function(filename) {
-                try {
-                    const response = await fetch(
-                        `${API_URL}/api/pdf/timecard/download/${filename}`,
-                        {
-                            headers: {
-                                'Authorization': `Bearer ${localStorage.getItem('token')}`
-                            }
-                        }
-                    );
-
-                    if (!response.ok) throw new Error('Failed to download PDF');
-
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    a.remove();
-
-                } catch (error) {
-                    console.error('Error downloading timecard:', error);
-                    alert('Error downloading timecard. Please try again.');
-                }
-            }
-
-            // Initialize page
-            const currentEmployee = JSON.parse(localStorage.getItem('currentEmployee'));
-            if (currentEmployee) {
-                document.getElementById('employeeName').textContent = 
-                    `${currentEmployee.firstName} ${currentEmployee.lastName}`;
-                document.getElementById('employeeId').textContent = currentEmployee.employeeId;
-            }
-
-            // Load timecard history when page loads
-            loadTimecardHistory();
-        });
-    </script>
+    <script src="../js/payperiod.js"></script>
 </body>
 </html>
