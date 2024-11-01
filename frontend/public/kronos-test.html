@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kronos API Test</title>
+</head>
+<body>
+    <h1>Kronos API Test</h1>
+    <button onclick="testKronosAPI()">Test Kronos API</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testKronosAPI() {
+            const result = document.getElementById('result');
+            try {
+                const response = await fetch('http://192.168.1.101:5000/api/test/kronos-test');
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+                console.log('API Response:', data);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+                console.error('API Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

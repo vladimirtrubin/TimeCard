@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>2FA Verification</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Verify Your Identity</h2>
+        
+        <!-- Employee Info Section -->
+        <div id="employeeInfo" class="profile-info">
+            <!-- Will be populated by JavaScript -->
+        </div>
+        
+        <!-- Verification Form -->
+        <div id="verificationSection">
+            <p>A verification code has been sent to your email. Please enter it below.</p>
+            <form id="verificationForm">
+                <div class="form-group">
+                    <label for="verificationCode">Verification Code:</label>
+                    <input type="text" id="verificationCode" name="verificationCode" required>
+                </div>
+                <button type="submit">Verify Code</button>
+            </form>
+        </div>
+
+        <!-- Password Creation Section (Initially Hidden) -->
+        <div id="passwordSection" style="display:none;">
+            <h3>Create Your Password</h3>
+            <form id="passwordForm">
+                <div class="form-group">
+                    <label for="newPassword">New Password:</label>
+                    <input type="password" id="newPassword" name="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password:</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                <button type="submit">Set Password</button>
+            </form>
+        </div>
+
+        <!-- Message Display -->
+        <p id="message"></p>
+    </div>
+    <script src="../js/verify-2fa.js"></script>
+</body>
+</html>

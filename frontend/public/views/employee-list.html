@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee List</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .fire-incident-list {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .incident-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .incident-table th {
+            background-color: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .incident-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .status-yes {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-no {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .download-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            background-color: #218838;
+        }
+
+        .refresh-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-info {
+            color: #666;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .pagination button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #007bff;
+        }
+
+        .pagination button:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="fire-incident-list">
+            <h2>Timecards for Pay Period: <span id="payPeriodDisplay"></span></h2>
+            
+            <div class="refresh-section">
+                <div class="results-info">
+                    Results Per Page: 
+                    <select id="pageSize">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="pagination">
+                    <button id="prevPage">←</button>
+                    <span id="pageInfo">1-25 of 100</span>
+                    <button id="nextPage">→</button>
+                </div>
+            </div>
+
+            <table class="incident-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Last Name</th>
+                        <th>First Name</th>
+                        <th>Signed</th>
+                        <th>Validate</th>
+                        <th>Validated By</th>
+                        <th>Text</th>
+                        <th>Email</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeList">
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+        let currentPage = 1;
+        let pageSize = 25;
+        let employees = [];
+
+        async function loadEmployees() {
+            try {
+                const response = await fetch(`${API_URL}/api/employee/list`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch employees');
+
+                const data = await response.json();
+                employees = data.employees;
+                displayEmployees();
+                updatePagination();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading employee list');
+            }
+        }
+
+        function displayEmployees() {
+            const tbody = document.getElementById('employeeList');
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            const pageEmployees = employees.slice(start, end);
+
+            tbody.innerHTML = pageEmployees.map(emp => `
+                <tr>
+                    <td>${emp.employeeId}</td>
+                    <td>${emp.lastName}</td>
+                    <td>${emp.firstName}</td>
+                    <td class="${emp.signed === 'Yes' ? 'status-yes' : 'status-no'}">${emp.signed}</td>
+                    <td>No Timecard</td>
+                    <td>Not Validated</td>
+                    <td>${emp.text}</td>
+                    <td>${emp.email}</td>
+                    <td>
+                        <button class="download-btn" onclick="viewTimecard('${emp.employeeId}')">
+                            View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updatePagination() {
+            const total = employees.length;
+            const start = (currentPage - 1) * pageSize + 1;
+            const end = Math.min(start + pageSize - 1, total);
+            
+            document.getElementById('pageInfo').textContent = `${start}-${end} of ${total}`;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = end >= total;
+        }
+
+        async function viewTimecard(employeeId) {
+            // Add view/download logic here
+        }
+
+        // Event Listeners
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayEmployees();
+                updatePagination();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            const maxPage = Math.ceil(employees.length / pageSize);
+            if (currentPage < maxPage) {
+                currentPage++;
+                displayEmployees();
+                updatePagination();
+            }
+        });
+
+        document.getElementById('pageSize').addEventListener('change', (e) => {
+            pageSize = parseInt(e.target.value);
+            currentPage = 1;
+            displayEmployees();
+            updatePagination();
+        });
+
+        // Set current pay period
+        const now = new Date();
+        const payPeriodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const payPeriodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        document.getElementById('payPeriodDisplay').textContent = 
+            `${payPeriodStart.toLocaleDateString()} to ${payPeriodEnd.toLocaleDateString()}`;
+
+        // Load initial data
+        loadEmployees();
+    </script>
+</body>
+</html>

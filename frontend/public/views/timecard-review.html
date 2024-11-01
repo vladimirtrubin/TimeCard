@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timecard Review</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .timecard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .timecard-table th,
+        .timecard-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .timecard-table th {
+            background-color: #f5f5f5;
+        }
+
+        .totals-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Timecard Review</h2>
+        <div class="employee-info">
+            <p><strong>Name:</strong> <span id="employeeName"></span></p>
+            <p><strong>Rank:</strong> <span id="employeeRank"></span></p>
+            <p><strong>Employee ID:</strong> <span id="employeeId"></span></p>
+            <p><strong>Pay Period:</strong> <span id="payPeriod"></span></p>
+        </div>
+
+        <h3>Schedule Data:</h3>
+        <table class="timecard-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Code</th>
+                    <th>Hours</th>
+                    <th>Unit</th>
+                    <th>Position</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleData">
+                <!-- Data will be inserted here -->
+            </tbody>
+        </table>
+
+        <div class="totals-section">
+            <h3>Work Code Subtotals:</h3>
+            <div id="workCodeTotals">
+                <!-- Work code totals will be inserted here -->
+            </div>
+            <h4>Total Hours: <span id="grandTotal"></span></h4>
+        </div>
+
+        <div class="signature-section" id="signatureSection" style="display: none; margin-top: 20px; padding: 20px; border-top: 1px solid #ddd;">
+            <p><strong>Signed by:</strong> <span id="signatureName"></span></p>
+            <p><strong>Date:</strong> <span id="signatureDate"></span></p>
+        </div>
+
+        <div class="button-group">
+            <button onclick="signTimecard()" class="btn-confirm" id="signButton">Sign It</button>
+            <button onclick="window.location.href='payperiod.html'" class="btn-cancel">Back</button>
+        </div>
+    </div>
+
+    <script>
+        // Define API_URL and functions in global scope
+        const API_URL = 'http://localhost:5000';
+
+        async function signTimecard() {
+            try {
+                const timecardData = JSON.parse(localStorage.getItem('timecardData'));
+                const submitButton = document.getElementById('signButton');
+                const employeeName = document.getElementById('employeeName').textContent;
+                const currentDate = new Date();
+                const formattedDate = currentDate.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+
+                // Show loading state
+                submitButton.disabled = true;
+                submitButton.textContent = 'Signing...';
+
+                const response = await fetch(`${API_URL}/api/timecard/sign`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        employeeId: timecardData.data.employeeId,
+                        payPeriod: timecardData.data.payPeriod,
+                        signatureDate: formattedDate,
+                        employeeName: employeeName
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save signature');
+                }
+
+                const data = await response.json();
+
+                // Display signature section
+                const signatureSection = document.getElementById('signatureSection');
+                document.getElementById('signatureName').textContent = employeeName;
+                document.getElementById('signatureDate').textContent = formattedDate;
+                signatureSection.style.display = 'block';
+
+                // Update button to "Submit" and change its onclick handler
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit';
+                submitButton.onclick = submitSignedTimecard;
+
+                // Update the timecard data in localStorage
+                timecardData.signature = {
+                    name: employeeName,
+                    date: formattedDate
+                };
+                localStorage.setItem('timecardData', JSON.stringify(timecardData));
+
+            } catch (error) {
+                console.error('Error signing timecard:', error);
+                const submitButton = document.getElementById('signButton');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Sign It';
+                showErrorMessage(error.message || 'Error saving signature. Please try again.');
+            }
+        }
+
+        async function submitSignedTimecard() {
+            try {
+                const timecardData = JSON.parse(localStorage.getItem('timecardData'));
+                const submitButton = document.getElementById('signButton');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Submitting...';
+
+                const response = await fetch(`${API_URL}/api/pdf/timecard/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        employeeId: timecardData.data.employeeId,
+                        payPeriod: timecardData.data.payPeriod,
+                        signature: timecardData.signature,
+                        timecardData: timecardData.data
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to submit timecard');
+                }
+
+                const data = await response.json();
+                submitButton.textContent = 'Submitted';
+                showSuccessMessage(data.filename);
+
+            } catch (error) {
+                console.error('Error submitting timecard:', error);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Submit';
+                showErrorMessage(error.message || 'Error submitting timecard');
+            }
+        }
+
+        function showSuccessMessage(filename) {
+            const messageContainer = document.createElement('div');
+            messageContainer.style.cssText = 'margin-top: 20px; text-align: center;';
+
+            const successMessage = document.createElement('div');
+            successMessage.style.cssText = 'background-color: #d4edda; color: #155724; padding: 10px; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 15px;';
+            successMessage.textContent = 'Timecard submitted successfully!';
+            messageContainer.appendChild(successMessage);
+
+            const downloadButton = document.createElement('button');
+            downloadButton.className = 'btn-confirm';
+            downloadButton.style.cssText = 'width: 100%; margin-top: 10px; padding: 10px;';
+            downloadButton.textContent = 'Download PDF';
+            downloadButton.onclick = () => downloadTimecard(filename);
+            messageContainer.appendChild(downloadButton);
+
+            const buttonGroup = document.querySelector('.button-group');
+            buttonGroup.parentNode.insertBefore(messageContainer, buttonGroup.nextSibling);
+        }
+
+        function showErrorMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = 'background-color: #f8d7da; color: #721c24; padding: 10px; border: 1px solid #f5c6cb; border-radius: 4px; margin-top: 10px;';
+            messageDiv.textContent = message;
+            
+            const buttonGroup = document.querySelector('.button-group');
+            buttonGroup.parentNode.insertBefore(messageDiv, buttonGroup.nextSibling);
+            
+            setTimeout(() => messageDiv.remove(), 5000);
+        }
+
+        async function downloadTimecard(filename) {
+            try {
+                const response = await fetch(
+                    `${API_URL}/api/pdf/timecard/download/${filename}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to download PDF');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+            } catch (error) {
+                console.error('Error downloading PDF:', error);
+                showErrorMessage('Error downloading PDF. Please try again.');
+            }
+        }
+
+        // Initialize page when loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const timecardData = JSON.parse(localStorage.getItem('timecardData'));
+            if (!timecardData || !timecardData.data) {
+                window.location.href = 'payperiod.html';
+                return;
+            }
+
+            const data = timecardData.data;
+
+            // Fill employee info
+            document.getElementById('employeeName').textContent = data.employeeName;
+            document.getElementById('employeeRank').textContent = data.employeeRank;
+            document.getElementById('employeeId').textContent = data.employeeId;
+            document.getElementById('payPeriod').textContent = data.payPeriod;
+
+            // Fill schedule data
+            const scheduleBody = document.getElementById('scheduleData');
+            data.scheduleData.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.date}</td>
+                    <td>${entry.code}</td>
+                    <td>${entry.hours}</td>
+                    <td>${entry.unit}</td>
+                    <td>${entry.position}</td>
+                `;
+                scheduleBody.appendChild(row);
+            });
+
+            // Fill work code totals
+            const totalsDiv = document.getElementById('workCodeTotals');
+            Object.entries(data.workCodeTotals).forEach(([code, hours]) => {
+                const p = document.createElement('p');
+                p.textContent = `${code}: ${hours.toFixed(1)} hours`;
+                totalsDiv.appendChild(p);
+            });
+
+            // Fill grand total
+            document.getElementById('grandTotal').textContent = 
+                `${data.grandTotalHours.toFixed(1)} hours`;
+        });
+    </script>
+</body>
+</html>

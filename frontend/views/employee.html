@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enter Employee ID and Submit Timecard</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <h2>Enter Employee ID</h2>
+    <form id="employeeForm">
+        <label for="employeeId">Employee ID:</label>
+        <input type="text" id="employeeId" name="employeeId" required><br><br>
+        <button type="submit">Proceed</button>
+    </form>
+    <p id="message"></p>
+
+    <div id="timecardSection" style="display:none;">
+        <h3>Submit Timecard</h3>
+        <form id="timecardForm">
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required><br><br>
+            <label for="hoursWorked">Hours Worked:</label>
+            <input type="number" id="hoursWorked" name="hoursWorked" step="0.1" required><br><br>
+            <button type="submit">Submit Timecard</button>
+        </form>
+        <p id="timecardMessage"></p>
+    </div>
+
+    <script src="js/employee.js"></script>
+</body>
+</html>

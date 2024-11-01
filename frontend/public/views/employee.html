@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Timecard</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Enter Employee ID</h2>
+        <form id="employeeForm">
+            <div class="form-group">
+                <label for="employeeId">Employee ID:</label>
+                <input type="text" id="employeeId" name="employeeId" required>
+            </div>
+            <button type="submit" id="searchButton">Search</button>
+        </form>
+        
+        <div id="loadingIndicator" style="display:none;" class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Please wait, searching database...</p>
+        </div>
+        
+        <p id="message"></p>
+
+        <!-- Profile Section - Will contain verification UI for new employees -->
+        <div id="profileSection" style="display:none;">
+            <!-- Content will be inserted by JavaScript -->
+        </div>
+
+        <!-- Password Section - For employees with existing passwords -->
+        <div id="passwordSection" style="display:none;">
+            <!-- Content will be inserted by JavaScript -->
+        </div>
+    </div>
+
+    <script src="../js/employee.js"></script>
+</body>
+</html>

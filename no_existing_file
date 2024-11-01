@@ -1,0 +1,6 @@
+// At the top of backend/app.js
+require('dotenv').config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    <button onclick="testAPI()">Test Connection</button>
+    <p id="result"></p>
+
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('result');
+            try {
+                const response = await fetch('http://192.168.1.101:5000/api/health');
+                const data = await response.json();
+                result.textContent = 'Connection successful: ' + JSON.stringify(data);
+                result.style.color = 'green';
+            } catch (error) {
+                result.textContent = 'Connection failed: ' + error.message;
+                result.style.color = 'red';
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

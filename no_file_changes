@@ -1,0 +1,11 @@
+{
+  "name": "timecard-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Timecard Service",
+  "scripts": {
+    "start": "serve public"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Organization Login</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Organization Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="organization">Organization:</label>
+                <input type="text" id="organization" name="organization" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" id="submitButton">Login</button>
+        </form>
+        <div id="loadingIndicator" style="display: none;">Loading...</div>
+        <p id="message"></p>
+    </div>
+    <script src="../js/login.js"></script>
+</body>
+</html>

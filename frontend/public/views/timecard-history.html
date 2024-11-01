@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Timecard History</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Timecard History</h2>
+        <div class="filters">
+            <input type="date" id="startDate">
+            <input type="date" id="endDate">
+            <button onclick="fetchTimecards()">Filter</button>
+        </div>
+        <div id="timecardList"></div>
+    </div>
+    <script src="../js/timecard-history.js"></script>
+</body>
+</html>
