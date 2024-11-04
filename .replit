@@ -1,5 +1,9 @@
 run = "npm start"
+<<<<<<< HEAD
 entrypoint = "backend/app.js"
+=======
+entrypoint = "/timecard/backend/app.js"
+>>>>>>> c2ea421738a9bef670c45cd37fc260e8f53b6e39
 
 [env]
 PORT = "3000"
@@ -14,6 +18,7 @@ deploymentTarget = "cloudrun"
 
 [[hints]]
 regex = "Server running"
+<<<<<<< HEAD
 message = "Your server is ready!"
 
 [[ports]]
@@ -23,3 +28,6 @@ externalPort = 80
 [[ports]]
 localPort = 5000
 externalPort = 5000
+=======
+message = "Your server is ready!"
+>>>>>>> c2ea421738a9bef670c45cd37fc260e8f53b6e39
