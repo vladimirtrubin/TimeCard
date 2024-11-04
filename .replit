@@ -1,0 +1,25 @@
+run = "npm start"
+entrypoint = "backend/app.js"
+
+[env]
+PORT = "3000"
+NODE_ENV = "production"
+
+[nix]
+channel = "stable-22_11"
+
+[deployment]
+run = ["sh", "-c", "npm start"]
+deploymentTarget = "cloudrun"
+
+[[hints]]
+regex = "Server running"
+message = "Your server is ready!"
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 5000
+externalPort = 5000

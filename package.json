@@ -1,0 +1,11 @@
+{
+  "name": "timecard",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "bash start.sh",
+    "postinstall": "cd backend && npm install && cd ../frontend && npm install"
+  },
+  "dependencies": {
+    "concurrently": "^8.0.1"
+  }
+} 
